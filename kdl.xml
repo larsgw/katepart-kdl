@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language
+[
+    <!ENTITY decimal "[+-]?[0-9][0-9_]*(?:\.[0-9][0-9_]*)?">
+    <!ENTITY ident "[&#x0021;&#x0024;-&#x0027;&#x002A;-&#x002E;&#x0030;-&#x003A;&lt;&#x003E;-&#x005A;\&#x005E;-&#x007A;&#x007C;&#x007E;&#x0080;-&#x0084;&#x0086;-&#x009F;&#x00A1;-&#x167F;&#x1681;-&#x1FFF;&#x200B;-&#x200D;&#x2010;-&#x2027;&#x2030;-&#x205E;&#x2060;-&#x2065;&#x206A;-&#x2FFF;&#x3001;-&#xD7FF;&#xE000;-&#xFEFE;&#xFF00;-&#x10FFFF;]+">
+]>
+<language
+  name="KDL"
+  section="Configuration"
+  extensions=".kdl"
+  mimetype="application/vnd.kdl"
+  version="1"
+  kateversion="5.79"
+  author="Lars Willighagen"
+  license="MIT"
+>
+  <highlighting>
+    <list name="float">
+      <item>#inf</item>
+      <item>#-inf</item>
+      <item>#nan</item>
+    </list>
+    <list name="boolean">
+      <item>#true</item>
+      <item>#false</item>
+    </list>
+    <list name="null">
+      <item>#null</item>
+    </list>
+    <contexts>
+      <context attribute="Error" lineEndContext="#stay" name="Document">
+        <IncludeRules context="NodeSpace"/>
+
+        <!-- TODO strings -->
+        <RegExpr attribute="Node" context="Node" String="&ident;" />
+        <DetectChar attribute="Syntax" context="Node Tag" char="(" />
+        <DetectChar attribute="Syntax" context="#pop" char="}" endRegion="RegionNodeChildren" />
+
+        <Detect2Chars attribute="Comment" context="SingleLineComment" char="/" char1="/" />
+      </context>
+      <context attribute="Error" lineEndContext="#pop" name="Node Tag">
+        <IncludeRules context="NodeSpace"/>
+
+        <!-- TODO strings -->
+        <RegExpr attribute="Node" context="#stay" String="&ident;" />
+        <LineContinue attribute="Syntax" context="#stay" char="\"/>
+        <DetectChar attribute="Syntax" context="#pop!Node Start" char=")" />
+      </context>
+      <context attribute="Error" lineEndContext="#pop" name="Node Start">
+        <IncludeRules context="NodeSpace"/>
+        <!-- TODO strings -->
+        <RegExpr attribute="Node" context="Node" String="&ident;" />
+        <LineContinue attribute="Syntax" context="#stay" char="\" />
+      </context>
+
+      <!-- Values -->
+      <context attribute="Normal Text" lineEndContext="#pop" name="Node">
+        <RegExpr attribute="Integer" context="#stay" String="[+-]?(?:0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)" />
+        <RegExpr attribute="Float" context="#stay" String="&decimal;[eE][+-]?[0-9][0-9_]*" />
+        <keyword attribute="Float" context="#stay" String="float" />
+        <RegExpr attribute="Decimal" context="#stay" String="&decimal;" />
+        <keyword attribute="Keyword" context="#stay" String="boolean" />
+        <keyword attribute="Keyword" context="#stay" String="null" />
+
+        <StringDetect attribute="String" context="MultilineQuotedString" String="&quot;&quot;&quot;" />
+        <DetectChar attribute="String" context="QuotedString" char="&quot;" />
+        <RegExpr attribute="RawString" context="MultilineRawString" String="(#+)&quot;&quot;&quot;" />
+        <RegExpr attribute="RawString" context="RawString" String="(#+)&quot;" />
+        <RegExpr attribute="String" context="#stay" String="&ident;" />
+
+        <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" />
+
+        <LineContinue attribute="Syntax" context="#stay" char="\" />
+        <DetectChar attribute="Syntax" context="#pop" char=";" />
+        <DetectChar attribute="Syntax" context="#pop#pop" char="}" endRegion="RegionNodeChildren" />
+        <DetectChar attribute="Syntax" context="Document" char="{" beginRegion="RegionNodeChildren" />
+      </context>
+
+      <!-- Strings -->
+      <context attribute="String" lineEndContext="#stay" name="MultilineQuotedString">
+        <StringDetect attribute="String" context="#pop" String="&quot;&quot;&quot;" />
+        <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
+        <RegExpr attribute="WhitespaceEscape" context="#stay" String="\\\s+" />
+      </context>
+      <context attribute="String" lineEndContext="#pop" name="QuotedString">
+        <DetectChar attribute="String" context="#pop" char="&quot;" />
+        <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
+      </context>
+      <context attribute="RawString" lineEndContext="#stay" name="MultilineRawString">
+        <StringDetect attribute="RawString" context="#pop" String="&quot;&quot;&quot;%1" dynamic="true" />
+      </context>
+      <context attribute="RawString" lineEndContext="#pop" name="RawString">
+        <StringDetect attribute="RawString" context="#pop" String="&quot;%1" dynamic="true" />
+      </context>
+
+      <!-- Spaces -->
+      <context name="NodeSpace">
+        <DetectSpaces context="#stay" attribute="Normal Text" />
+        <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" beginRegion="RegionComment" />
+      </context>
+
+      <!-- Comments -->
+      <context attribute="Comment" lineEndContext="#pop" name="SingleLineComment"></context>
+      <context attribute="Comment" lineEndContext="#stay" name="MultiLineComment">
+        <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" beginRegion="RegionComment" />
+        <Detect2Chars attribute="Comment" context="#pop" char="*" char1="/" endRegion="RegionComment" />
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal" />
+      <itemData name="Error" defStyleNum="dsError" />
+      <itemData name="Syntax" defStyleNum="dsOperator" />
+      <itemData name="Node" defStyleNum="dsKeyword" />
+      <!--dsVariable-->
+      <itemData name="RawString" defStyleNum="dsVerbatimString" />
+      <itemData name="String" defStyleNum="dsString" />
+      <itemData name="Escape" defStyleNum="dsSpecialChar" />
+      <itemData name="Float" defStyleNum="dsFloat" />
+      <itemData name="Decimal" defStyleNum="dsDecVal" />
+      <itemData name="Integer" defStyleNum="dsBaseN" />
+      <itemData name="Keyword" defStyleNum="dsKeyword" />
+      <itemData name="Comment" defStyleNum="dsComment" />
+    </itemDatas>
+  </highlighting>
+  <general>
+    <comments>
+      <comment name="singleLine" start="//" position="afterwhitespace"/>
+      <comment name="multiLine" start="/*" end="*/" region="RegionComment"/>
+    </comments>
+    <keywords casesensitive="0"/>
+  </general>
+</language>
