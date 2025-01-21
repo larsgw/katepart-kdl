@@ -97,7 +97,6 @@
         <IncludeRules context="NodeSpace"/>
 
         <RegExpr attribute="Key" context="Property" String="&string;&ws;=" lookAhead="true" />
-        <DetectChar attribute="Syntax" context="#stay" char="=" />
         <DetectChar attribute="Syntax" context="AnnotationStart" char="(" />
 
         <RegExpr attribute="Integer" context="#stay" String="[+-]?(?:0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)" />
@@ -165,7 +164,6 @@
       <context name="LineSpace" attribute="Error">
         <IncludeRules context="NodeSpace" />
         <Detect2Chars attribute="Comment" context="SingleLineComment" char="/" char1="/" />
-        <Detect2Chars attribute="Comment" context="SlashDashNode" char="/" char1="-" />
       </context>
       <context name="NodeSpace" attribute="Error">
         <DetectSpaces context="#stay" attribute="Normal Text" />
