@@ -12,7 +12,7 @@ See [`docs/example.kdl`](docs/example.kdl).
 
 - Download [`kdl.xml`](kdl.xml) and copy it into the aformentioned directory.
 
-- Restart Kate. Alternatively, press <kdb>F7</kdb>, type `reload-highlighting`, and press enter.
+- Restart Kate. Alternatively, press <kbd>F7</kbd>, type `reload-highlighting`, and press enter.
 
 ## Limitations
 
