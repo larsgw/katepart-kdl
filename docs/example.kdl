@@ -1,0 +1,48 @@
+// Regular nodes
+node ##"raw "#\n string"## "quoted string" {
+  // Child blocks
+  asda #"""
+    Multiline strings
+    """#;
+};
+
+/* nes
+  /* ted */
+  comments
+*/
+
+many-values \
+  123 \
+  -1.23e4 \
+  0b001 \
+  0o456 \
+  0xABC \
+  also-line-continuations;
+
+// Properties
+node foo=(tag)1
+node foo /*bar*/ =(tag)1
+
+// Type annotations
+(foo) bar foo 123
+("foo") bar foo 123
+("""foo""") bar foo 123
+(#"foo"#) bar foo 123
+(#"""foo"""#) bar foo 123
+(foo /*baz*/) bar foo 123
+
+// Strings as node identifiers
+foo bar 123
+"foo" bar 123
+"""foo""" bar 123
+#"foo"# bar 123
+#"""foo"""# bar 123
+
+// Multiline strings!
+"""
+asda
+"""
+
+("""
+dafs
+""") adsfo
