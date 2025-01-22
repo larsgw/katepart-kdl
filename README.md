@@ -21,4 +21,3 @@ See [`docs/example.kdl`](docs/example.kdl).
 - Whitespace or line comments after line continuations are not supported.
 - Mandatory whitespace between values is not checked.
 - Whitespace requirements of multiline strings are not checked.
-- Whitespace escapes with newlines are not handled.

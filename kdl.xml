@@ -4,6 +4,8 @@
     <!ENTITY decimal "[+-]?[0-9][0-9_]*(?:\.[0-9][0-9_]*)?">
     <!ENTITY ident "(?![+-]?\.?\d)[&#x0021;&#x0024;-&#x0027;&#x002A;-&#x002E;&#x0030;-&#x003A;&lt;&#x003E;-&#x005A;\&#x005E;-&#x007A;&#x007C;&#x007E;&#x0080;-&#x0084;&#x0086;-&#x009F;&#x00A1;-&#x167F;&#x1681;-&#x1FFF;&#x200B;-&#x200D;&#x2010;-&#x2027;&#x2030;-&#x205E;&#x2060;-&#x2065;&#x206A;-&#x2FFF;&#x3001;-&#xD7FF;&#xE000;-&#xFEFE;&#xFF00;-&#x10FFFF;]+">
     <!ENTITY string "(?:&ident;|&quot;(?:\\.|[^&quot;\\])*&quot;|(#+)&quot;.*?&quot;\1)">
+    <!ENTITY uws "[\t\s&#x00A0;&#x1680;&#x2000;-&#x200A;&#x202F;&#x205F;&#x3000;]+">
+    <!ENTITY ws "(?:&uws;|/\*(?:\*(?!/)|/(?!\*)|[^*/])*\*/)*">
 ]>
 <language
   name="KDL"
@@ -147,11 +149,13 @@
       <context name="MultilineQuotedString" attribute="String" lineEndContext="#stay">
         <StringDetect attribute="String" context="#pop" String="&quot;&quot;&quot;" endRegion="RegionQuotedString" />
         <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
-        <RegExpr attribute="WhitespaceEscape" context="#stay" String="\\\s+" />
+        <RegExpr attribute="WhitespaceEscape" context="MultilineWhitespaceEscape" String="\\&uws;" />
+        <LineContinue attribute="WhitespaceEscape" context="MultilineWhitespaceEscape" />
       </context>
       <context name="QuotedString" attribute="String" lineEndContext="#pop">
         <DetectChar attribute="String" context="#pop" char="&quot;" />
         <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
+        <RegExpr attribute="WhitespaceEscape" context="#stay" String="\\&uws;" />
       </context>
       <context name="MultilineRawString" attribute="RawString" lineEndContext="#stay">
         <StringDetect attribute="RawString" context="#pop" String="&quot;&quot;&quot;%1" dynamic="true" endRegion="RegionRawString" />
@@ -161,12 +165,15 @@
       </context>
 
       <!-- Spaces -->
+      <context name="MultilineWhitespaceEscape" attribute="WhitespaceEscape" fallthroughContext="#pop" lineEndContext="#stay">
+        <DetectSpaces attribute="WhitespaceEscape" context="#stay" />
+      </context>
       <context name="LineSpace" attribute="Error">
         <IncludeRules context="NodeSpace" />
         <Detect2Chars attribute="Comment" context="SingleLineComment" char="/" char1="/" />
       </context>
       <context name="NodeSpace" attribute="Error">
-        <DetectSpaces context="#stay" attribute="Normal Text" />
+        <DetectSpaces attribute="Normal Text" context="#stay" />
         <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" beginRegion="RegionComment" />
         <Detect2Chars attribute="Comment" context="#stay" char="/" char1="-" />
         <LineContinue attribute="Syntax" context="#stay" char="\" />
@@ -189,6 +196,7 @@
       <itemData name="RawString" defStyleNum="dsVerbatimString" />
       <itemData name="String" defStyleNum="dsString" />
       <itemData name="Escape" defStyleNum="dsSpecialChar" />
+      <itemData name="WhitespaceEscape" defStyleNum="dsAlert" />
       <itemData name="Float" defStyleNum="dsFloat" />
       <itemData name="Decimal" defStyleNum="dsDecVal" />
       <itemData name="Integer" defStyleNum="dsBaseN" />
