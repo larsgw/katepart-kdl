@@ -96,8 +96,6 @@
 
       <!-- Values -->
       <context name="Node" attribute="Error" lineEndContext="#pop">
-        <IncludeRules context="NodeSpace"/>
-
         <RegExpr attribute="Key" context="Property" String="&string;&ws;=" lookAhead="true" />
         <DetectChar attribute="Syntax" context="AnnotationStart" char="(" />
 
@@ -118,6 +116,8 @@
         <DetectChar attribute="Syntax" context="#pop#pop" char="}" endRegion="RegionNodeChildren" />
         <DetectChar attribute="Syntax" context="Document" char="{" beginRegion="RegionNodeChildren" />
         <Detect2Chars attribute="Comment" context="#pop!SingleLineComment" char="/" char1="/" />
+
+        <IncludeRules context="NodeSpace"/>
       </context>
 
       <!-- Properties -->
@@ -177,6 +177,13 @@
         <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" beginRegion="RegionComment" />
         <Detect2Chars attribute="Comment" context="#stay" char="/" char1="-" />
         <LineContinue attribute="Syntax" context="#stay" char="\" />
+        <DetectChar attribute="Syntax" context="EscLine" char="\" />
+      </context>
+      <context name="EscLine" attribute="Error" lineEmptyContext="#pop">
+        <RegExpr context="#pop" column="0" String="." lookAhead="true" />
+        <DetectSpaces attribute="Normal Text" context="#stay" />
+        <Detect2Chars attribute="Comment" context="MultiLineComment" char="/" char1="*" beginRegion="RegionComment" />
+        <Detect2Chars attribute="Comment" context="SingleLineComment" char="/" char1="/" />
       </context>
 
       <!-- Comments -->
