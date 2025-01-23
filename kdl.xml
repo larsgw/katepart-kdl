@@ -7,12 +7,16 @@
 
     <!ENTITY ident "(?![+-]?\.?\d)[&#x0021;&#x0024;-&#x0027;&#x002A;-&#x002E;&#x0030;-&#x003A;&lt;&#x003E;-&#x005A;\&#x005E;-&#x007A;&#x007C;&#x007E;&#x0080;-&#x0084;&#x0086;-&#x009F;&#x00A1;-&#x167F;&#x1681;-&#x1FFF;&#x200B;-&#x200D;&#x2010;-&#x2027;&#x2030;-&#x205E;&#x2060;-&#x2065;&#x206A;-&#x2FFF;&#x3001;-&#xD7FF;&#xE000;-&#xFEFE;&#xFF00;-&#x10FFFF;]+">
     <!ENTITY quot3 "&quot;&quot;&quot;">
-    <!ENTITY string "(?:&ident;|&quot;(?:\\.|[^&quot;\\])*&quot;|(#+)&quot;.*?&quot;\1)">
     <!ENTITY stringstart "#*&quot;|&ident;">
     <!ENTITY stringesc "\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}">
     <!ENTITY nodestart "&stringstart;|\(">
-    <!-- TODO multiLine RegExpr not supported -->
+
     <!ENTITY uws "[\t\s&#x00A0;&#x1680;&#x2000;-&#x200A;&#x202F;&#x205F;&#x3000;]+">
+
+    <!-- For recognizing property keys -->
+    <!-- TODO multi-line RegExpr not supported -->
+    <!ENTITY string "(?:&ident;|&quot;(?:\\.|[^&quot;\\])*&quot;|(#+)&quot;.*?&quot;\1)">
+    <!--<!ENTITY string "&ident;|&quot3;(?:\n|\\.|[^&quot;\\])*?&quot3;|&quot;(?:\\.|[^&quot;\\\n])*&quot;|(#+)&quot3;.*?&quot3;\1|(#+)&quot;[^\n]*?&quot;\2">-->
     <!ENTITY ws "(?:&uws;|/\*(?:\*(?!/)|/(?!\*)|[^*/])*\*/)*">
 ]>
 <language
