@@ -2,8 +2,16 @@
 <!DOCTYPE language
 [
     <!ENTITY decimal "[+-]?[0-9][0-9_]*(?:\.[0-9][0-9_]*)?">
+    <!ENTITY int "[+-]?(?:0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)">
+    <!ENTITY float "&decimal;[eE][+-]?[0-9][0-9_]*">
+
     <!ENTITY ident "(?![+-]?\.?\d)[&#x0021;&#x0024;-&#x0027;&#x002A;-&#x002E;&#x0030;-&#x003A;&lt;&#x003E;-&#x005A;\&#x005E;-&#x007A;&#x007C;&#x007E;&#x0080;-&#x0084;&#x0086;-&#x009F;&#x00A1;-&#x167F;&#x1681;-&#x1FFF;&#x200B;-&#x200D;&#x2010;-&#x2027;&#x2030;-&#x205E;&#x2060;-&#x2065;&#x206A;-&#x2FFF;&#x3001;-&#xD7FF;&#xE000;-&#xFEFE;&#xFF00;-&#x10FFFF;]+">
+    <!ENTITY quot3 "&quot;&quot;&quot;">
     <!ENTITY string "(?:&ident;|&quot;(?:\\.|[^&quot;\\])*&quot;|(#+)&quot;.*?&quot;\1)">
+    <!ENTITY stringstart "#*&quot;|&ident;">
+    <!ENTITY stringesc "\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}">
+    <!ENTITY nodestart "&stringstart;|\(">
+    <!-- TODO multiLine RegExpr not supported -->
     <!ENTITY uws "[\t\s&#x00A0;&#x1680;&#x2000;-&#x200A;&#x202F;&#x205F;&#x3000;]+">
     <!ENTITY ws "(?:&uws;|/\*(?:\*(?!/)|/(?!\*)|[^*/])*\*/)*">
 ]>
@@ -33,7 +41,7 @@
     <contexts>
       <context name="Document" attribute="Error">
         <IncludeRules context="LineSpace"/>
-        <RegExpr context="NodeStart" String="#*&quot;|&ident;|\(" lookAhead="true" />
+        <RegExpr context="NodeStart" String="&nodestart;" lookAhead="true" />
         <DetectChar attribute="Syntax" context="#pop!NodeTerminator" char="}" endRegion="RegionNodeChildren" />
       </context>
       <context name="NodeTerminator" attribute="Error" lineEndContext="#pop#pop">
@@ -46,14 +54,14 @@
       <context name="NodeStart" attribute="Error" lineEndContext="#pop">
         <IncludeRules context="NodeSpace"/>
         <DetectChar attribute="Syntax" context="AnnotationStart" char="(" />
-        <StringDetect attribute="Identifier" context="#pop!MultilineQuotedIdentifier" String="&quot;&quot;&quot;" beginRegion="RegionQuotedString" />
+        <StringDetect attribute="Identifier" context="#pop!MultilineQuotedIdentifier" String="&quot3;" beginRegion="RegionQuotedString" />
         <DetectChar attribute="Identifier" context="#pop!QuotedIdentifier" char="&quot;" />
-        <RegExpr attribute="Identifier" context="#pop!MultilineRawIdentifier" String="(#+)&quot;&quot;&quot;" beginRegion="RegionRawString" />
+        <RegExpr attribute="Identifier" context="#pop!MultilineRawIdentifier" String="(#+)&quot3;" beginRegion="RegionRawString" />
         <RegExpr attribute="Identifier" context="#pop!RawIdentifier" String="(#+)&quot;" />
         <RegExpr attribute="Identifier" context="#pop!Node" String="&ident;" />
       </context>
       <context name="MultilineQuotedIdentifier" attribute="Identifier">
-        <StringDetect attribute="Identifier" context="#pop!Node" String="&quot;&quot;&quot;" endRegion="RegionQuotedString" />
+        <StringDetect attribute="Identifier" context="#pop!Node" String="&quot3;" endRegion="RegionQuotedString" />
         <IncludeRules context="MultilineQuotedString" includeAttrib="false" />
       </context>
       <context name="QuotedIdentifier" attribute="Identifier" lineEndContext="#pop!Node">
@@ -61,7 +69,7 @@
         <IncludeRules context="QuotedString" includeAttrib="false" />
       </context>
       <context name="MultilineRawIdentifier" attribute="Identifier">
-        <StringDetect attribute="Identifier" context="#pop!Node" String="&quot;&quot;&quot;%1" dynamic="true" endRegion="RegionRawString" />
+        <StringDetect attribute="Identifier" context="#pop!Node" String="&quot3;%1" dynamic="true" endRegion="RegionRawString" />
         <IncludeRules context="MultilineRawString" includeAttrib="false" />
       </context>
       <context name="RawIdentifier" attribute="Identifier" lineEndContext="#pop!Node">
@@ -72,9 +80,9 @@
       <!-- Annotation -->
       <context name="AnnotationStart" attribute="Error" lineEndContext="#pop">
         <IncludeRules context="NodeSpace"/>
-        <StringDetect attribute="Annotation" context="#pop!MultilineQuotedAnnotation" String="&quot;&quot;&quot;" beginRegion="RegionQuotedString" />
+        <StringDetect attribute="Annotation" context="#pop!MultilineQuotedAnnotation" String="&quot3;" beginRegion="RegionQuotedString" />
         <DetectChar attribute="Annotation" context="#pop!QuotedAnnotation" char="&quot;" />
-        <RegExpr attribute="Annotation" context="#pop!MultilineRawAnnotation" String="(#+)&quot;&quot;&quot;" beginRegion="RegionRawString" />
+        <RegExpr attribute="Annotation" context="#pop!MultilineRawAnnotation" String="(#+)&quot3;" beginRegion="RegionRawString" />
         <RegExpr attribute="Annotation" context="#pop!RawAnnotation" String="(#+)&quot;" />
         <RegExpr attribute="Annotation" context="#pop!AnnotationEnd" String="&ident;" />
       </context>
@@ -83,7 +91,7 @@
         <DetectChar attribute="Syntax" context="#pop" char=")" />
       </context>
       <context name="MultilineQuotedAnnotation" attribute="Annotation">
-        <StringDetect attribute="Annotation" context="#pop!AnnotationEnd" String="&quot;&quot;&quot;" endRegion="RegionQuotedString" />
+        <StringDetect attribute="Annotation" context="#pop!AnnotationEnd" String="&quot3;" endRegion="RegionQuotedString" />
         <IncludeRules context="MultilineQuotedString" includeAttrib="false" />
       </context>
       <context name="QuotedAnnotation" attribute="Annotation" lineEndContext="#pop!AnnotationEnd">
@@ -91,7 +99,7 @@
         <IncludeRules context="QuotedString" includeAttrib="false" />
       </context>
       <context name="MultilineRawAnnotation" attribute="Annotation">
-        <StringDetect attribute="Annotation" context="#pop!AnnotationEnd" String="&quot;&quot;&quot;%1" dynamic="true" endRegion="RegionRawString" />
+        <StringDetect attribute="Annotation" context="#pop!AnnotationEnd" String="&quot3;%1" dynamic="true" endRegion="RegionRawString" />
         <IncludeRules context="MultilineRawString" includeAttrib="false" />
       </context>
       <context name="RawAnnotation" attribute="Annotation" lineEndContext="#pop!AnnotationEnd">
@@ -104,16 +112,16 @@
         <RegExpr context="Property" String="&string;&ws;=" lookAhead="true" />
         <DetectChar attribute="Syntax" context="AnnotationStart" char="(" />
 
-        <RegExpr attribute="Integer" context="#stay" String="[+-]?(?:0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)" />
-        <RegExpr attribute="Float" context="#stay" String="&decimal;[eE][+-]?[0-9][0-9_]*" />
+        <RegExpr attribute="Integer" context="#stay" String="&int;" />
+        <RegExpr attribute="Float" context="#stay" String="&float;" />
         <keyword attribute="Float" context="#stay" String="float" />
         <RegExpr attribute="Decimal" context="#stay" String="&decimal;" />
         <keyword attribute="Keyword" context="#stay" String="boolean" />
         <keyword attribute="Keyword" context="#stay" String="null" />
 
-        <StringDetect attribute="String" context="MultilineQuotedString" String="&quot;&quot;&quot;" beginRegion="RegionQuotedString" />
+        <StringDetect attribute="String" context="MultilineQuotedString" String="&quot3;" beginRegion="RegionQuotedString" />
         <DetectChar attribute="String" context="QuotedString" char="&quot;" />
-        <RegExpr attribute="RawString" context="MultilineRawString" String="(#+)&quot;&quot;&quot;" beginRegion="RegionRawString" />
+        <RegExpr attribute="RawString" context="MultilineRawString" String="(#+)&quot3;" beginRegion="RegionRawString" />
         <RegExpr attribute="RawString" context="RawString" String="(#+)&quot;" />
         <RegExpr attribute="String" context="#stay" String="&ident;" />
 
@@ -130,9 +138,9 @@
       <context name="Property" attribute="Error" lineEndContext="#pop">
         <IncludeRules context="NodeSpace"/>
 
-        <StringDetect attribute="Key" context="MultilineQuotedKey" String="&quot;&quot;&quot;" beginRegion="RegionQuotedString" />
+        <StringDetect attribute="Key" context="MultilineQuotedKey" String="&quot3;" beginRegion="RegionQuotedString" />
         <DetectChar attribute="Key" context="QuotedKey" char="&quot;" />
-        <RegExpr attribute="Key" context="MultilineRawKey" String="(#+)&quot;&quot;&quot;" beginRegion="RegionRawString" />
+        <RegExpr attribute="Key" context="MultilineRawKey" String="(#+)&quot3;" beginRegion="RegionRawString" />
         <RegExpr attribute="Key" context="RawKey" String="(#+)&quot;" />
         <RegExpr attribute="Key" context="#stay" String="&ident;" />
 
@@ -153,18 +161,18 @@
 
       <!-- Strings -->
       <context name="MultilineQuotedString" attribute="String">
-        <StringDetect attribute="String" context="#pop" String="&quot;&quot;&quot;" endRegion="RegionQuotedString" />
-        <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
+        <StringDetect attribute="String" context="#pop" String="&quot3;" endRegion="RegionQuotedString" />
+        <RegExpr attribute="Escape" context="#stay" String="&stringesc;" />
         <RegExpr attribute="WhitespaceEscape" context="MultilineWhitespaceEscape" String="\\&uws;" />
         <LineContinue attribute="WhitespaceEscape" context="MultilineWhitespaceEscape" />
       </context>
       <context name="QuotedString" attribute="String" lineEndContext="#pop">
         <DetectChar attribute="String" context="#pop" char="&quot;" />
-        <RegExpr attribute="Escape" context="#stay" String="\\[nrt&quot;\\bfs]|\\u\{[0-9a-fA-F]{1,6}\}" />
+        <RegExpr attribute="Escape" context="#stay" String="&stringesc;" />
         <RegExpr attribute="WhitespaceEscape" context="#stay" String="\\&uws;" />
       </context>
       <context name="MultilineRawString" attribute="RawString">
-        <StringDetect attribute="RawString" context="#pop" String="&quot;&quot;&quot;%1" dynamic="true" endRegion="RegionRawString" />
+        <StringDetect attribute="RawString" context="#pop" String="&quot3;%1" dynamic="true" endRegion="RegionRawString" />
       </context>
       <context name="RawString" attribute="RawString" lineEndContext="#pop">
         <StringDetect attribute="RawString" context="#pop" String="&quot;%1" dynamic="true" />
@@ -206,11 +214,11 @@
         <DetectChar attribute="Comment" context="#pop#pop" char="}" />
         <DetectChar attribute="Comment" context="SlashDashDocument" char="{" />
         <Detect2Chars attribute="Comment" context="#pop!SingleLineComment" char="/" char1="/" />
-        <RegExpr context="SlashDashValue" String="#*&quot;|&ident;" lookAhead="true" />
+        <RegExpr context="SlashDashValue" String="&stringstart;" lookAhead="true" />
       </context>
       <context name="SlashDashDocument" attribute="Comment">
         <IncludeRules context="NodeSpace" />
-        <RegExpr context="SlashDashNode" String="#*&quot;|&ident;|\(" lookAhead="true" />
+        <RegExpr context="SlashDashNode" String="&nodestart;" lookAhead="true" />
         <DetectChar attribute="Comment" context="#pop!SlashDashNodeTerminator" char="}" />
       </context>
       <context name="SlashDashNodeTerminator" lineEndContext="#pop#pop">
@@ -221,7 +229,7 @@
       <context name="SlashDashPropOrArg" attribute="Comment" fallthroughContext="#pop">
         <IncludeRules context="NodeSpace" />
         <DetectChar attribute="Comment" context="#pop!SlashDashDocument" char="{" />
-        <RegExpr context="#pop!SlashDashKey" String="#*&quot;|&ident;" lookAhead="true" />
+        <RegExpr context="#pop!SlashDashKey" String="&stringstart;" lookAhead="true" />
         <RegExpr context="#pop!SlashDashArg" String="." lookAhead="true" />
       </context>
       <context name="SlashDashProp" attribute="Comment" fallthroughContext="#pop">
@@ -229,22 +237,22 @@
         <DetectChar attribute="Comment" context="#pop!SlashDashArg" char="=" />
       </context>
       <context name="SlashDashKey" attribute="Comment" fallthroughContext="#pop">
-        <StringDetect attribute="Comment" context="#pop!SlashDashMultilineKey" String="&quot;&quot;&quot;" />
+        <StringDetect attribute="Comment" context="#pop!SlashDashMultilineKey" String="&quot3;" />
         <DetectChar attribute="Comment" context="#pop!SlashDashQuotedKey" char="&quot;" />
-        <RegExpr attribute="Comment" context="#pop!SlashDashMultilineRawKey" String="(#+)&quot;&quot;&quot;" />
+        <RegExpr attribute="Comment" context="#pop!SlashDashMultilineRawKey" String="(#+)&quot3;" />
         <RegExpr attribute="Comment" context="#pop!SlashDashRawKey" String="(#+)&quot;" />
         <RegExpr attribute="Comment" context="#pop!SlashDashProp" String="&ident;" />
       </context>
       <context name="SlashDashMultilineKey" attribute="Comment">
-        <StringDetect attribute="Comment" context="#pop!SlashDashProp" String="&quot;&quot;&quot;" />
-        <RegExpr attribute="Comment" context="#stay" String="\\[&quot;\\]" />
+        <StringDetect attribute="Comment" context="#pop!SlashDashProp" String="&quot3;" />
+        <RegExpr attribute="Comment" context="#stay" String="&stringesc;" />
       </context>
       <context name="SlashDashQuotedKey" attribute="Comment" lineEndContext="#pop">
         <DetectChar attribute="Comment" context="#pop!SlashDashProp" char="&quot;" />
-        <RegExpr attribute="Comment" context="#stay" String="\\[&quot;\\]" />
+        <RegExpr attribute="Comment" context="#stay" String="&stringesc;" />
       </context>
       <context name="SlashDashMultilineRawKey" attribute="Comment">
-        <StringDetect attribute="Comment" context="#pop!SlashDashProp" String="&quot;&quot;&quot;%1" dynamic="true" />
+        <StringDetect attribute="Comment" context="#pop!SlashDashProp" String="&quot3;%1" dynamic="true" />
       </context>
       <context name="SlashDashRawKey" attribute="Comment" lineEndContext="#pop">
         <StringDetect attribute="Comment" context="#pop!SlashDashProp" String="&quot;%1" dynamic="true" />
@@ -257,28 +265,28 @@
       </context>
       <context name="SlashDashValue" attribute="Comment" fallthroughContext="#pop">
         <IncludeRules context="NodeSpace" />
-        <RegExpr attribute="Comment" context="#pop" String="[+-]?(?:0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)" />
-        <RegExpr attribute="Comment" context="#pop" String="&decimal;[eE][+-]?[0-9][0-9_]*" />
+        <RegExpr attribute="Comment" context="#pop" String="&int;" />
+        <RegExpr attribute="Comment" context="#pop" String="&float;" />
         <keyword attribute="Comment" context="#pop" String="float" />
         <RegExpr attribute="Comment" context="#pop" String="&decimal;" />
         <keyword attribute="Comment" context="#pop" String="boolean" />
         <keyword attribute="Comment" context="#pop" String="null" />
-        <StringDetect attribute="Comment" context="#pop!SlashDashMultilineString" String="&quot;&quot;&quot;" />
+        <StringDetect attribute="Comment" context="#pop!SlashDashMultilineString" String="&quot3;" />
         <DetectChar attribute="Comment" context="#pop!SlashDashQuotedString" char="&quot;" />
-        <RegExpr attribute="Comment" context="#pop!SlashDashMultilineRawString" String="(#+)&quot;&quot;&quot;" />
+        <RegExpr attribute="Comment" context="#pop!SlashDashMultilineRawString" String="(#+)&quot3;" />
         <RegExpr attribute="Comment" context="#pop!SlashDashRawString" String="(#+)&quot;" />
         <RegExpr attribute="Comment" context="#pop" String="&ident;" />
       </context>
       <context name="SlashDashMultilineString" attribute="Comment">
-        <StringDetect attribute="Comment" context="#pop" String="&quot;&quot;&quot;" />
-        <RegExpr attribute="Comment" context="#stay" String="\\[&quot;\\]" />
+        <StringDetect attribute="Comment" context="#pop" String="&quot3;" />
+        <RegExpr attribute="Comment" context="#stay" String="&stringesc;" />
       </context>
       <context name="SlashDashQuotedString" attribute="Comment" lineEndContext="#pop">
         <DetectChar attribute="Comment" context="#pop" char="&quot;" />
-        <RegExpr attribute="Comment" context="#stay" String="\\[&quot;\\]" />
+        <RegExpr attribute="Comment" context="#stay" String="&stringesc;" />
       </context>
       <context name="SlashDashMultilineRawString" attribute="Comment">
-        <StringDetect attribute="Comment" context="#pop" String="&quot;&quot;&quot;%1" dynamic="true" />
+        <StringDetect attribute="Comment" context="#pop" String="&quot3;%1" dynamic="true" />
       </context>
       <context name="SlashDashRawString" attribute="Comment" lineEndContext="#pop">
         <StringDetect attribute="Comment" context="#pop" String="&quot;%1" dynamic="true" />
