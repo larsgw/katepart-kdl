@@ -16,7 +16,6 @@ See [`docs/example.kdl`](docs/example.kdl).
 
 ## Limitations
 
-- Slash-dash comments are not highlighted properly.
 - Property keys are highlighted as string values if the equals sign appears on a different line, or if the equals sign is preceded by a nested `/**/` comment.
 - Mandatory whitespace between values is not checked.
 - Whitespace requirements of multiline strings are not checked.
