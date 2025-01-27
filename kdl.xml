@@ -52,6 +52,7 @@
         <IncludeRules context="NodeSpace"/>
         <DetectChar attribute="Syntax" context="#pop#pop" char=";" />
         <Detect2Chars attribute="Comment" context="#pop#pop!SingleLineComment" char="/" char1="/" />
+        <RegExpr attribute="Comment" context="#pop#pop!SlashDashPropOrArg" String="/-" />
       </context>
 
       <!-- Node Name -->
